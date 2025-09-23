@@ -2,36 +2,32 @@
 # Create a systemd service that autostarts & manages a docker-compose instance in the current directory
 # by Uli Köhler - https://techoverflow.net
 # Licensed as CC0 1.0 Universal
-SERVICENAME=$(basename $(pwd))
+# Modified by Hugo Klepsch
 
-echo "Creating systemd service... /etc/systemd/system/${SERVICENAME}.service"
-# Create systemd service file
-cat >$SERVICENAME.service <<EOF
-[Unit]
-Description=$SERVICENAME
-Requires=docker.service
-After=docker.service
+set -euo pipefail
 
-[Service]
-Restart=always
-User=root
-Group=docker
-WorkingDirectory=$(pwd)
-# Shutdown container (if running) when unit is started
-# ExecStartPre=$(which docker-compose) -f docker-compose.yaml down
-# Start container when unit is started
-ExecStart=$(which docker-compose) -f docker-compose.yaml up
-# Stop container when unit is stopped
-ExecStop=$(which docker-compose) -f docker-compose.yaml down
+# Unlike the other versions of this script, we don't need to generate the
+# service file because it is so simple.
+service_unit_name="reverse-proxy-network.service"
 
-[Install]
-WantedBy=multi-user.target
-EOF
+if [[ "${INSTALL:-false}" == "true" ]]; then
+	echo "Installing systemd service... /etc/systemd/system/${service_unit_name}"
+	sudo cp "${GEN_DIR}/${service_unit_name}" "/etc/systemd/system/${service_unit_name}"
 
-sudo cp "${SERVICENAME}.service" "/etc/systemd/system/$SERVICENAME.service"
+	sudo systemctl daemon-reload
 
-echo "Enabling & starting $SERVICENAME"
-# Autostart systemd service
-sudo systemctl enable $SERVICENAME.service
-# Start systemd service now
-sudo systemctl start $SERVICENAME.service
+	if [[ "${ENABLE_NOW:-false}" == "true" ]]; then
+		# Start systemd units on startup (and right now)
+		echo "Enabling & starting ${service_unit_name}"
+		sudo systemctl enable --now "${service_unit_name}"
+		exit 0
+	else
+		echo "Run with INSTALL=true ENABLE_NOW=true ./create... to install and start and enable"
+		exit 0
+	fi
+else
+	echo "Run with INSTALL=true ./create... to install"
+	exit 0
+fi
+
+exit 0

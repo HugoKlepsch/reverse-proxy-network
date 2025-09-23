@@ -1,4 +1,5 @@
 # orion deploy instructions
 
-`docker-compose -p reverse-proxy-network up -d --force-recreate
-
+```bash
+INSTALL=true ENABLE_NOW=true ./create-systemd-service.sh
+```
