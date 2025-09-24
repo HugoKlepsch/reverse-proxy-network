@@ -6,7 +6,6 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-Restart=always
 User=root
 Group=docker
 ExecStart=/usr/bin/bash -c "docker network create reverse-proxy-network; docker network create monitoring"

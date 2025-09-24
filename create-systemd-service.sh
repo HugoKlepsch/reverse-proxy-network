@@ -12,7 +12,7 @@ service_unit_name="reverse-proxy-network.service"
 
 if [[ "${INSTALL:-false}" == "true" ]]; then
 	echo "Installing systemd service... /etc/systemd/system/${service_unit_name}"
-	sudo cp "${GEN_DIR}/${service_unit_name}" "/etc/systemd/system/${service_unit_name}"
+	sudo cp "${service_unit_name}" "/etc/systemd/system/${service_unit_name}"
 
 	sudo systemctl daemon-reload
 
